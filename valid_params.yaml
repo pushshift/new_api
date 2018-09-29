@@ -310,7 +310,7 @@ gid_1:
         gid_1=<3 (return objects that have been gilded less than 3 times)
 
     types: numeric
-    valid_objects: comment,submission
+    valid objects: comment,submission
 
 gid_2:
     description: |
@@ -322,7 +322,7 @@ gid_2:
         gid_1=<3 (return objects that have been gilded less than 3 times)
 
     types: numeric
-    valid_objects: comment,submission
+    valid objects: comment,submission
 
 gid_3:
     description: |
@@ -334,21 +334,21 @@ gid_3:
         gid_1=<3 (return objects that have been gilded less than 3 times)
 
     types: numeric
-    valid_objects: comment,submission
+    valid objects: comment,submission
 
 author_flair_text:
     description: |
         Filter comments and submissions based on the author's flair (https://www.youtube.com/watch?v=_ChQK8j6so8)
 
     types: string
-    valid_objects: comment,submission
+    valid objects: comment,submission
 
 link_flair_text:
     description: |
         Filter submissions based on the links's flair.
 
     types: string
-    valid_objects: submission
+    valid objects: submission
 
 aggs:
     description: |
@@ -369,7 +369,7 @@ aggs:
         https://api.pushshift.io/reddit/comment/search/?q=overwatch&after=7d&aggs=subreddit
 
     types: string
-    valid_objects: comment,submission
+    valid objects: comment,submission
 
 frequency:
     description: |
@@ -382,5 +382,11 @@ frequency:
         https://api.pushshift.io/reddit/submission/search/?title=games&aggs=created_utc&frequency=7d
 
     types: string
-    valid_objects: comment,submission
+    valid objects: comment,submission
 
+size:
+    description: |
+        This is used to specify the number of objects to return.
+
+    types: numeric
+    valid objects: comment,submission,subreddit
