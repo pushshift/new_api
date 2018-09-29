@@ -1,0 +1,386 @@
+q:
+    description: |
+        This parameter is used to filter results based on a word, multiple terms or phrases.  This parameter supports
+        the following types of operations:
+
+        + signifies AND operation
+        | signifies OR operation
+        - negates a single token
+        " wraps a number of tokens to signify a phrase for searching
+        * at the end of a term signifies a prefix query
+        ( and ) signify precedence
+        ~N after a word signifies edit distance (fuzziness)
+        ~N after a phrase signifies slop amount
+
+    types: string
+    valid objects: comment,submission,subreddit
+    
+subreddit:
+    description: |
+        This parameter is used to filter by subreddit.  You can include multiple subreddits by comma-delimiting the list
+        of subreddits (e.g. subreddit=politics,news,worldnews).  You can also exclude specific subreddits by using =!
+        For example, to get all results except from the subreddits askscience and physics, use subreddit=!askscience,physics
+
+    types: string
+    valid objects: comment,submission,subreddit
+
+subreddit:
+    description: |
+        This parameter is used to filter by domain.  You can include multiple domains by comma-delimiting the list
+        of domains (e.g. domain=nytimes.com,washingtonpost.com).  You can also exclude specific domains by using =!
+        For example, to get all results except from the domains foxnews.com, use domain=!foxnews.com
+
+    types: string 
+    valid objects: submission
+
+author:
+    description: |
+        This parameter is used to filter by author.  You can include multiple authors by comma-delimiting the list
+        of authors (e.g. author=joe123,tommy456).  You can also exclude specific authors by using =!
+        For example, to get all results except from the authors automoderator and iamabot, use author=!automoderator,iamabot
+
+    types: string
+    valid objects: comment,submission
+
+title:
+    description: |
+        This parameter will search submissions based on the title field and can use the same type of operators as the "q" parameter
+
+    types: string
+    valid objects: submission
+
+selftext:
+    description: |
+        This parameter will search submissions based on the selftext field and can use the same type of operators as the "q" parameter
+
+    types: string
+    valid objects: submission
+
+after:
+    description: |
+        This parameter can be used to limit the date range of returned results.  This parameter will accept multiple types of values.  
+        If a number is passed, it treats the value as an epoch second timestamp.  If a number is followed by 'm,h,d' (minutes, hours, days) 
+        it calculates the amount of time for you.  For example, to return all returns within the past three days, you can pass after=3d which
+        translates to "everything after 3 days ago."  Finally, you can pass an ISO-6801 formatted string in a date (YYYY-MM-DD) or 
+        datetime (YYYY-MM-DD HH:MM:SS) format.  For example, to return everything after January 1, 2015, you can use after=2015-01-01.  
+        You can also use after=2015-01-01 04:33:19 to be more precise with the range returned.
+
+    types: string,numeric
+    valid objects: comment,submission,subreddit
+
+before:
+    description: |
+        This parameter can be used to limit the date range of returned results.  This parameter will accept multiple types of values.  
+        If a number is passed, it treats the value as an epoch second timestamp.  If a number is followed by 'm,h,d' (minutes, hours, days) 
+        it calculates the amount of time for you.  For example, to return all returns older than three days, you can pass before=3d which
+        translates to "everything before 3 days ago."  Finally, you can pass an ISO-6801 formatted string in a date (YYYY-MM-DD) or 
+        datetime (YYYY-MM-DD HH:MM:SS) format.  For example, to return everything before January 1, 2015, you can use before=2015-01-01.  
+        You can also use before=2015-01-01 04:33:19 to be more precise with the range returned.
+
+    types: string,numeric
+    valid objects: comment,submission,subreddit
+        
+link_id:
+    description: |
+        This parameter can be used to filter comments based on the submission. This will also accept multiple link id's if they are
+        comma-delimited.  For example, to return comments only from the submission with id "9jryc2", you would set the link_id=9jryc2
+
+    types: string
+    valid objects: comment
+
+is_self:
+    description: |
+        This parameter will filter submissions by whether they are a self post or link to something outside of Reddit.
+
+    types: boolean
+    valid objects: submission
+
+locked:
+    description: |
+        This parameter will filter submissions based on whether they were locked at the last update.
+
+    types: boolean
+    valid objects: submission
+
+spoiler:
+    description: |
+        This parameter will filter submissions based on whether they were classified as a spoiler at the last update.
+
+    types: boolean
+    valid objects: submission
+
+over_18:
+    description: |
+        This parameter will filter submissions based on whether they are NSFW/NSFL.
+
+    types: boolean
+    valid objects: submission
+
+brand_safe:
+    description: |
+        This parameter will filter submissions based on whether they were labeled as brand safe.
+
+    types: boolean
+    valid objects: submission
+
+contest_mode:
+    description: |
+        This parameter will filter submissions based on whether they were labeled as a contest.
+
+    types: boolean
+    valid objects: submission
+
+is_video:
+    description: |
+        This parameter will filter submissions based on whether they were labeled as a video by Reddit.
+
+    types: boolean
+    valid objects: submission
+
+stickied:
+    description: |
+        This parameter will filter comments and submissions based on whether they were stickied at last update.
+
+    types: boolean
+    valid objects: comment,submission
+
+is_crosspostable:
+    description: |
+        This parameter will filter submissions based on whether they are crosspostable.
+
+    types: boolean
+    valid objects: submission
+
+can_gild:
+    description: |
+        This parameter will filter comments and submissions based on whether they can be gilded.
+
+    types: boolean
+    valid objects: comment,submission
+
+is_bot:
+    description: |
+        This parameter will filter comments and submissions based on whether they were created by a known bot account.
+        The list of bots is constantly expanding and updated.
+
+    types: boolean
+    valid objects: comment,submission
+
+nest_level:
+    description: |
+        This parameter will filter comments based on their nest level (depth).  Top level comments have a nest level
+        of 1. Replies to top level comments would have a nest level of 2 and so on.
+
+    types: numeric
+    valid objects: comment
+
+is_edited:
+    description: |
+        This parameter will filter comments and submissions based on whether they were edited.
+
+    types: boolean
+    valid objects: comment,submission
+
+mod_removed:
+    description: |
+        This parameter will filter comments and submissions based on whether they were removed by a moderator.                        
+
+    types: boolean
+    valid objects: comment,submission
+
+user_removed:
+    description: |
+        This parameter will filter comments and submissions based on whether they were removed by the original user.
+
+    types: boolean
+    valid objects: comment,submission
+
+reply_delay:
+    description: |
+        This parameter will filter comments based on the number of elapsed seconds since the reply was made to the parent comment. For
+        instance, if a top level comment was made and then a reply was made 90 seconds later, the second comment would have a reply_delay
+        of 90.
+
+    types: numeric
+    valid objects: comment
+
+sub_reply_delay:
+    description: |
+        This parameter will filter comments based on the number of elapsed seconds since the reply was made to the parent submission. For
+        instance, if a submission was made at 12:00:00 and a comment within that submission was made at 12:01:30, the comment would have a
+        sub_reply_delay of 90.
+
+    types: numeric
+    valid objects: comment 
+
+length:
+    description: |
+        The length of the comment body in characters.
+
+    types: numeric
+    valid objects: comment
+
+title_length:
+    description: |
+        The length of the submission title in characters.
+
+    types: numeric
+    valid objects: submission
+
+author_created_utc:
+    description: |
+        This parameter is the account age (in epoch seconds) of the author of a submission or comment. This can be used to filter comments or
+        submissions based on the age of the author account.  This parameter works much like the before and after parameters.  Valid types of 
+        filters include:
+
+        author_created_utc=<YYYY-MM-DD (Greater than a certain date)
+        author_created_utc=>YYYY-MM-DD (Less than a certain date)
+        author_created_utc=>1510002000 (Greater than an Epoch date)
+
+        When using this parameter, some objects may not be returned if this value is null.  Also, comments and submissions with an author of 
+        [deleted] will not be returned when using this parameter (since the creation time of the account cannot be determined with [deleted]
+        authors).
+
+    types: string,numeric
+    valid objects: comment,submission
+
+score:
+    description: |
+        The score (karma) for a comment or submission.  Submissions cannot have a score of less than 0.  Comments can have negative scores.
+
+    types: numeric
+    valid objects: comment,submission
+
+controversiality:
+    description: |
+        Whether a comment was considered controversial by Reddit.
+
+    types: boolean
+    valid objects: comment
+
+no_follow:
+    description: |
+        Whether a comment or submission has the no follow flag set.
+
+    types: boolean
+    valid objects: comment,submission
+
+send_replies:
+    description: |
+        Whether the author wants notifications of replies to their comment or submission.
+
+    types: boolean
+    valid objects: comment,submission
+
+parent_id:
+    description: |
+        The parent id of a comment.  Comments can be filted by passing a comment id to this parameter.
+
+    types: numeric
+    valid objects: comment
+
+id:
+    description: |
+        The id of an object.  Multiple objects can be requested by passing a comma-delimited list of ids.
+
+    types: string
+    valid objects: comment,submission,subreddit
+
+distinguished:
+    description: |
+        Filter by how a comment or submission is distinguished (moderator, admin, etc.)
+
+    types: string
+    valid objects: comment,submission
+
+subreddit_type:
+    description: |
+        Filter comments, submissions and subreddits based on the subreddit type (public,private,gold_only,employees_only,user,quarantined,etc.)
+
+    types: string
+    valid objects: comment,submission,subreddit
+
+gid_1:
+    description: |
+        Filter comments and submissions based on if they were gilded (level 1: silver)  This parameter takes an integer value.  For
+        example, here are some use cases for this parameter:
+
+        gid_1=>0 (return only objects that have been gilded at least once)
+        gid_1=4 (return only objects that have been gilded exactly four times)
+        gid_1=<3 (return objects that have been gilded less than 3 times)
+
+    types: numeric
+    valid_objects: comment,submission
+
+gid_2:
+    description: |
+        Filter comments and submissions based on if they were gilded (level 1: gold)  This parameter takes an integer value.  For
+        example, here are some use cases for this parameter:
+
+        gid_1=>0 (return only objects that have been gilded at least once)
+        gid_1=4 (return only objects that have been gilded exactly four times)
+        gid_1=<3 (return objects that have been gilded less than 3 times)
+
+    types: numeric
+    valid_objects: comment,submission
+
+gid_3:
+    description: |
+        Filter comments and submissions based on if they were gilded (level 3: platinum)  This parameter takes an integer value.  For
+        example, here are some use cases for this parameter:
+
+        gid_1=>0 (return only objects that have been gilded at least once)
+        gid_1=4 (return only objects that have been gilded exactly four times)
+        gid_1=<3 (return objects that have been gilded less than 3 times)
+
+    types: numeric
+    valid_objects: comment,submission
+
+author_flair_text:
+    description: |
+        Filter comments and submissions based on the author's flair (https://www.youtube.com/watch?v=_ChQK8j6so8)
+
+    types: string
+    valid_objects: comment,submission
+
+link_flair_text:
+    description: |
+        Filter submissions based on the links's flair.
+
+    types: string
+    valid_objects: submission
+
+aggs:
+    description: |
+        The aggs parameter allows you to perform aggregations across other fields.  For example, if you pass aggs=author
+        with your request, you will receive aggregations on authors for comments or submissions based on whatever other parameters
+        you supply.  Here are a few examples:
+
+        To get the top authors across the past three days who have used the term "Trump" in a comment:
+        
+        https://api.pushshift.io/reddit/comment/search/?q=trump&after=3d&aggs=author
+
+        To get the number of comments mentioning "universe" by day over the past 30 days:
+
+        https://api.pushshift.io/reddit/comment/search/?q=universe&after=30d&aggs=created_utc&frequency=1d
+
+        To get the top subreddits over the past 7 days that have mentioned "Overwatch":
+
+        https://api.pushshift.io/reddit/comment/search/?q=overwatch&after=7d&aggs=subreddit
+
+    types: string
+    valid_objects: comment,submission
+
+frequency:
+    description: |
+        This is used in conjunction with the aggs parameter when aggs=created_utc.  This determines the window size when returning
+        an aggregation based on time.  This accepts values in the format of number followed by (m,h,d) (minutes, hours, days).  This 
+        parameter also accepts values like (day,month,year).
+
+        For example, to return the number of submissions mentioning games in the title aggregated by week, you can use a query like this:
+
+        https://api.pushshift.io/reddit/submission/search/?title=games&aggs=created_utc&frequency=7d
+
+    types: string
+    valid_objects: comment,submission
+
