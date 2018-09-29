@@ -336,6 +336,13 @@ gid_3:
     types: numeric
     valid objects: comment,submission
 
+gilded:
+    description: |
+        Ignores the type of gilding and treats all three types as the same. Works similarly to gid_1, gid_2 and gid_3.
+
+    types: numeric
+    valid objects: comment,submisson
+
 author_flair_text:
     description: |
         Filter comments and submissions based on the author's flair (https://www.youtube.com/watch?v=_ChQK8j6so8)
