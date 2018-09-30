@@ -500,3 +500,43 @@ aggregation.shard_size:
     type: numeric
     valid objects: comment,submission
     max size: 100000
+
+output:
+    description: |
+        This controls the output format from the API.  It defaults to json but can also visualize data if set to png.
+
+    type: string
+    valid objects: comment,submission
+    default: json
+
+colormap:
+    description: |
+        Used to change the colors of a data visualization when output=png. Examples:
+
+            colormap=copper
+            colormap=autumn
+            colormap=Blues
+            
+            More information about possible color maps: https://matplotlib.org/examples/color/colormaps_reference.html
+            
+    type: string
+    category: visualization
+
+chart.title:
+    description: |
+        Set the chart title of a data visualization. Example:
+
+            chart.title=This is a Cool Chart
+
+    type: string
+    category: visualization
+
+chart.subtitle:
+    description: |
+        Set the chart subtitle of a data visualization. Example:
+
+            chart.subtitle=Additional Information about chart goes here.
+
+    type: string
+    category: visualization
+
