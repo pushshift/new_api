@@ -540,3 +540,39 @@ chart.subtitle:
     type: string
     category: visualization
 
+chart.log:
+    description: |
+        Set the chart Y scale to Log.
+
+    type: boolean
+    category: visualization
+
+chart.ymin:
+    description: |
+        Begin the Y-axis at this min value for a chart.
+
+    type: numeric
+    category: visualization
+
+chart.ymax:
+    description: |
+        End the Y-axis at this max value for a chart.
+
+    type: numeric
+    category: visualization
+
+chart.ylabel:
+    description: |
+        Set the Y-axis label.
+
+    type: string
+    category: visualization
+
+chart.trim:
+    description: |
+        Trim the last value of a chart. When doing aggregations, the last bucket can be misleadingly
+        low due to the fact that the time period isn't complete. This removed that last value.
+
+    type: boolean
+    category: visualization
+
