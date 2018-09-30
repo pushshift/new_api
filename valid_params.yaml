@@ -357,26 +357,32 @@ link_flair_text:
     type: string
     valid objects: submission
 
-aggs:
+aggregation:
     description: |
-        The aggs parameter allows you to perform aggregations across other fields. For example, if you pass aggs=author
+        The agg parameter allows you to perform aggregations across a specific field. For example, if you pass aggregation=author
         with your request, you will receive aggregations on authors for comments or submissions based on whatever other parameters
         you supply. Here are a few examples:
 
         To get the top authors across the past three days who have used the term "Trump" in a comment:
         
-        https://api.pushshift.io/reddit/comment/search/?q=trump&after=3d&aggs=author
+        https://api.pushshift.io/reddit/comment/search/?q=trump&after=3d&aggregation=author
 
         To get the number of comments mentioning "universe" by day over the past 30 days:
 
-        https://api.pushshift.io/reddit/comment/search/?q=universe&after=30d&aggs=created_utc&frequency=1d
+        https://api.pushshift.io/reddit/comment/search/?q=universe&after=30d&aggregation=created_utc&frequency=1d
 
         To get the top subreddits over the past 7 days that have mentioned "Overwatch":
 
-        https://api.pushshift.io/reddit/comment/search/?q=overwatch&after=7d&aggs=subreddit
+        https://api.pushshift.io/reddit/comment/search/?q=overwatch&after=7d&aggregation=subreddit
 
     type: string
     valid objects: comment,submission
+
+aggs:
+    description: |
+        (deprecated) Alias for aggregation.  Please use aggregation instead of aggs.
+
+    alias to: aggregation
 
 frequency:
     description: |
@@ -469,3 +475,28 @@ index:
 
     type: string
     valid objects: global
+
+aggregation.size:
+    description: |
+        This specifies the size of the aggregation returned (how many buckets to return).
+
+    type: numeric
+    valid objects: comment,submission
+    max size: 500
+    min size: 1
+    default: 25
+
+agg_size:
+    description: |
+        (deprecated) This is an alias for aggregation.size. Please use aggregation.size instead of agg_size.
+
+    alias to: aggregation.size
+    
+aggregation.shard_size:
+    description: |
+        This can be used with some term aggregations (like subreddit or author) to help reduce the doc_count_error_upper_bound
+        by increasing the value of this parameter. If not included, it defaults to the normal elasticsearch default.
+
+    type: numeric
+    valid objects: comment,submission
+    max size: 100000
