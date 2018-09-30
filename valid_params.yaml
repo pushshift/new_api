@@ -397,6 +397,7 @@ size:
 
     type: numeric
     valid objects: comment,submission,subreddit
+    default: 25
     max size: 500
     min size: 0
 
@@ -423,6 +424,7 @@ sort:
         sort=id:desc (sort by id descending)
 
     type: string
+    default: desc
     valid objects: comment,submission,subreddit
 
 metadata:
@@ -430,6 +432,7 @@ metadata:
         Shows the metadata associated with a query. This information is presented under the 'metadata' key in the returned JSON.
 
     type: boolean
+    default: false
     valid objects: global
 
 pretty:
@@ -437,6 +440,32 @@ pretty:
         This returns the JSON request in a format that is human friendly to read.
 
     type: boolean
+    default: false
     valid objects: global
 
+ensure_ascii:
+    description: |
+        This will ensure the returned JSON is ascii (7 bit) safe. All unicode characters besides ascii will be unicode encoded.
+        Example:
 
+        ensure_ascii=false beställningsjobb
+        ensure_ascii=true best\u00e4llningsjobb (ä has been encoded to \u00e4)
+
+    type: boolean
+    default: false
+    valid objects: global
+
+index:
+    description: |
+        This is an advanced parameter. On the back-end, multiple indexes are searched when a request is made. By specifying a 
+        specific index, queries can usually run much faster and use less processing power. Indexes are named in a quarterly
+        fashion. For example:
+
+        rc_2018-q01 (First quarter 2018 index for comments)
+        rs_2016-q03 (Third quarter 2016 index for submissions)
+
+        When doing searches for comments, the default is to use the "rc" index, which is an alias for all comment indexes. When
+        searching submissions, the default index is "rs".
+
+    type: string
+    valid objects: global
