@@ -6,6 +6,7 @@ import redis,hiredis
 import time
 import math
 import dataviz
+import zlib
 import ujson as json
 import requests
 import parameters
@@ -32,6 +33,8 @@ class MiddleWare:
                 self.visualization_params.add(key)
 
     def process_request(self, req, resp):
+
+        if req.method == 'POST': return
 
         # req.context and resp.context (dicts) can be used to stash data
         req.context["start_time"] = time.time()
@@ -87,6 +90,7 @@ class MiddleWare:
             req.context['type'] = 'subreddit'
 
     def process_resource(self, req, resp, resource, params):
+        if req.method == 'POST': return
 
         # Make copy of original parameters
         self.original_parameters = req.params.copy()
@@ -160,7 +164,7 @@ class MiddleWare:
         parameters.Process(self,req)
 
     def process_response(self,req,resp,resource,req_succeeded):
-
+        if req.method == 'POST': return
         if req_succeeded and req.context['type'] in ['comment','submission'] and 'stop_post_processing' not in req.context:
             resp.cache_control = ['private','max-age=1']
             image_data = self.process_image(req)
@@ -184,6 +188,18 @@ class MiddleWare:
             if 'aggs' in req.context:
                 data['aggs'] = req.context['aggs']
 
+            # Filter out fields if filter parameter is present
+            if 'filter' in req.params:
+                new_list = []
+                req.params['filter'] = req.params['filter'].split(',')
+                for d in data['data']:
+                    new_element = {}
+                    for filter in req.params['filter']:
+                        if filter in d:
+                            new_element[filter] = d[filter]
+                    new_list.append(new_element)
+                data['data'] = new_list
+
             # Check if metadata was requested
             if 'metadata' in req.context:
                 data['metadata'] = req.context['metadata']
@@ -196,17 +212,17 @@ class MiddleWare:
 
             json_data = json.dumps(data,**json_args)
             json_cache_data = json.dumps(data)  # No pretty
-            api.r.set('data-{}'.format(req.context['url_hash']),json_cache_data,300)
+            api.r.set('data-{}'.format(req.context['url_hash']),json_cache_data,api.cache_time)
 
             if 'url_hash_without_viz' in req.context:
-                api.r.set('data-{}'.format(req.context['url_hash_without_viz']),json_cache_data,300)
+                api.r.set('data-{}'.format(req.context['url_hash_without_viz']),json_cache_data,api.cache_time)
 
             if 'metadata' not in req.params or ('metadata' in req.params and req.params['metadata'] == False):
                 data.pop('metadata',None)
                 json_data = json.dumps(data,**json_args)
 
             if image_data:
-                api.r.set(req.context['url_hash'],image_data,300)
+                api.r.set(req.context['url_hash'],image_data,api.cache_time)
                 resp.append_header('content-type','image/png')
                 resp.body = image_data
             else:
@@ -239,8 +255,8 @@ class fetch_cache:
                     req.context['type'] = j['metadata']['type']
                 req.context['aggs'] = j['aggs']
                 req.context['image_data'] = MiddleWare.process_image(None,req)
-                api.r.set('data-{}'.format(req.context['url_hash']),req.context['data'],300)
-                api.r.set(req.context['url_hash'],req.context['image_data'],300)
+                api.r.set('data-{}'.format(req.context['url_hash']),req.context['data'],api.cache_time)
+                api.r.set(req.context['url_hash'],req.context['image_data'],api.cache_time)
             req.context['stop_post_processing'] = True
             resp.cache_control = ['private','max-age=1']
             resp.append_header('content-type','image/png')
@@ -306,6 +322,23 @@ class comment_search:
 
         es_connector.query_es(req)
 
+
+class insert_submission:
+    def on_post(self,req,resp):
+        data = req.bounded_stream.read()
+        if req.get_header('content-encoding') == 'gzip':
+            data = zlib.decompress(data).decode('utf-8')
+        else:
+            data = data.decode('utf-8')
+        #print(req.headers)
+        #print(req.get_header('content-type'))
+        #print(data.decode('utf-8'))
+        for d in data.split('\n'):
+            j = json.loads(d)
+        token = req.get_header('token',required=True)
+        resp.body = "ok"
+
+
 # Not sure if this is the best place for this object -- need it to be long-lived so it isn't destroyed after every connection
 es_connector = elasticsearch.Connector()
 ########################################
@@ -314,7 +347,8 @@ class App(falcon.API):
     def __init__(self, *args, **kwargs):
         super(App, self).__init__(*args, **kwargs)
         self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
-        self.enable_caching = False
+        self.enable_caching = True
+        self.cache_time = 900
 
 api = App(middleware=[MiddleWare()])
 api.req_options.auto_parse_qs_csv = False
@@ -322,6 +356,7 @@ api.req_options.keep_blank_qs_values = True
 
 #api.add_route('/reddit/subreddit/search', Subreddit.search())
 #api.add_route('/reddit/search/subreddit', Subreddit.search())
+api.add_route('/reddit/submission/insert', insert_submission())
 api.add_route('/reddit/search', comment_search())
 api.add_route('/reddit/comment/search', comment_search())
 api.add_route('/reddit/search/comment', comment_search())

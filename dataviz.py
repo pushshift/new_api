@@ -120,15 +120,15 @@ def create_timeline(req):
 
 def create_chart(req):
 
-    height = (len(data) * .25)
-    if height < 7: height = 7
-    fig = plt.figure(figsize=(8,height),dpi=150)
-
     for key in ['author','subreddit']:
         if key in req.context['aggs']:
             title = key.capitalize()
             data = req.context['aggs'][key]['buckets']
             break
+
+    height = (len(data) * .25)
+    if height < 7: height = 7
+    fig = plt.figure(figsize=(8,height),dpi=150)
     labels = [x['key'] for x in data[::-1]]
     values = [x['doc_count'] for x in data[::-1]]
     y_pos = np.arange(len(data))

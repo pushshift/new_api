@@ -105,21 +105,21 @@ def Process(obj,req):
                 terms['terms'][condition] = param_values
                 es_query['query']['bool']['filter']['bool']['must'].append(terms)
 
-    if 'sort_type' in req.params and req.params['sort_type'] is not None:
-        req.params["sort_type"] = req.params['sort_type'].lower()
+    if 'sort.field' in req.params and req.params['sort.field'] is not None:
+        req.params["sort.field"] = req.params['sort.field']
     else:
-        req.params["sort_type"] = "created_utc"
+        req.params["sort.field"] = "created_utc"
 
     if 'sort' in req.params:
         if ":" in req.params['sort']:
-            req.params['sort_type'], req.params['sort'] = req.params['sort'].split(":")
+            req.params['sort.field'], req.params['sort'] = req.params['sort'].split(":")
         else:
             req.params['sort'] = req.params['sort'].lower()
         if req.params['sort'] != "asc" and req.params['sort'] != "desc":
             req.params['sort'] = suggested_sort
     else:
         req.params['sort'] = suggested_sort
-    es_query['sort'][req.params['sort_type']] = req.params['sort']
+    es_query['sort'][req.params['sort.field']] = req.params['sort']
 
     # Process the size parameter.  If aggregation is requested and size is not specified, default
     # size to 0 (aggregation results only -- no ES doc hits)

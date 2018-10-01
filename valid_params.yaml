@@ -433,6 +433,14 @@ sort:
     default: desc
     valid objects: comment,submission,subreddit
 
+sort.field:
+    description: |
+        Sort results based on a specific field
+
+    type: string
+    default: created_utc
+    valid objects: comment,submission,subreddit
+
 metadata:
     description: |
         Shows the metadata associated with a query. This information is presented under the 'metadata' key in the returned JSON.
