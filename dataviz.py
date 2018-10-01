@@ -12,6 +12,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.dates as mdates
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MultipleLocator
 from pylab import savefig
@@ -19,22 +20,26 @@ import numpy as np
 import imageio
 import uuid
 import html
-import spacy
+#import spacy
 import pytz
 import falcon
 from wordcloud import WordCloud
 from collections import defaultdict
 
 
-def create_timeline(req,data):
+def create_timeline(req):
 
     data = req.context['aggs']['created_utc']['buckets']
+
+    if len(data) < 2:
+        return
 
     if 'chart.trim' in req.params and req.params['chart.trim']:
         del data[0]
         del data[-1]
 
     x = [datetime.datetime.fromtimestamp(int(z['key']),tz=pytz.utc) for z in data]
+
     agg_components = req.params['aggregation'][0].split('.')
     if len(agg_components) >= 3:
         if len(agg_components) == 4:
@@ -46,6 +51,7 @@ def create_timeline(req,data):
         y = [int(z['doc_count']) for z in data]
     y_pos = np.arange(len(y))
     fig = plt.figure(figsize=(6,3),dpi=200)
+
     ax = plt.gca()
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -54,20 +60,31 @@ def create_timeline(req,data):
         ax.set_yscale('log')
 
     if 'chart.ymin' in req.params:
-        ax.set_ylim(ymin=int(req.params['chart.ymin']))
-        ax.set_ylim(ymax=max(y)*1.4)
+        ax.set_ylim(bottom=int(req.params['chart.ymin']))
+        ax.set_ylim(ymax=max([v for v in y if v is not None])*1.4)
 
     if 'chart.ymax' in req.params:
         ax.set_ylim(ymax=int(req.params['chart.ymax']))
 
     ax.yaxis.grid(True,color='#CCCCCC',linestyle='--')
     ax.xaxis.grid(False)
+
+    #ax.xaxis.set_major_locator(months)
+    #ax.xaxis.set_minor_locator(days)
+
+
+    #ax.set_xticks(x)
+
     opts = {}
+
     if 'plot_options' in req.params:
         opts = ast.literal_eval(req.params['plot_options'])
 
     if 'color' not in opts:
         opts['color'] = '#1f77b4'
+
+    xticks = ax.xaxis.get_major_ticks()
+    #print(xticks)
 
     if 'ma' in req.params:
         ma = int(req.params['ma'])
@@ -75,6 +92,7 @@ def create_timeline(req,data):
         plt.plot(x,np.convolve(y,np.ones((ma,))/ma,mode='same'),'#175887')
     else:
         plt.plot(x,y,**opts)
+
 
     if 'chart.ylabel' in req.params:
         plt.ylabel(req.params['chart.ylabel'])
@@ -91,6 +109,7 @@ def create_timeline(req,data):
         plt.title("\n".join(wrap(title_string, 80)),fontsize=8,color='#333333')
 
     plt.tight_layout()
+
     fig.canvas.draw()       # draw the canvas, cache the renderer
     buf = io.BytesIO()
     savefig(buf, format='png')
@@ -99,7 +118,7 @@ def create_timeline(req,data):
     plt.close('all')
     return buf
 
-def create_chart(req,data):
+def create_chart(req):
 
     height = (len(data) * .25)
     if height < 7: height = 7
@@ -169,7 +188,7 @@ def create_chart(req,data):
     savefig(buf, format='png')
     buf.seek(0)
     # Is this needed?
-    #plt.close(fig)
-    #plt.close('all')
+    plt.close(fig)
+    plt.close('all')
     return buf
 

@@ -33,13 +33,15 @@ class MiddleWare:
 
     def process_request(self, req, resp):
 
+        # req.context and resp.context (dicts) can be used to stash data
+        req.context["start_time"] = time.time()
+
         req.context['visualization_params'] = self.visualization_params
 
         # Reorder parameters sorted alphabetically for caching purposes
         encoded_ordered_params = urllib.parse.urlencode(sorted(req.params.items()))
         self.ordered_url = "{}?{}".format(req.path,encoded_ordered_params).rstrip('?').encode('utf-8')
         req.context['url_hash'] = hashlib.sha256(self.ordered_url).hexdigest()
-
 
         if req.params.get('output') in ['png']:
             ordered_params_without_viz = req.params.copy()
@@ -49,20 +51,21 @@ class MiddleWare:
             self.ordered_url_without_viz = "{}?{}".format(req.path,encoded_ordered_params_without_viz).rstrip('?').encode('utf-8')
             req.context['url_hash_without_viz'] = hashlib.sha256(self.ordered_url_without_viz).hexdigest()
 
-            # Check if exact request exists in cache
-            data,image_data = api.r.mget('data-{}'.format(req.context['url_hash']),req.context['url_hash'])
-            if data is not None and image_data is not None:
-                req.context['image_data'] = image_data
-                req.context['data'] = data
-                req.context['reprocess visualization'] = False
-                req.path = "/cache"
-            else:
-                # Check if request with same data parameters but different viz parameters exist
-                data = api.r.get('data-{}'.format(req.context['url_hash_without_viz']))
-                if data is not None:
+            if api.enable_caching:
+                # Check if exact request exists in cache
+                data,image_data = api.r.mget('data-{}'.format(req.context['url_hash']),req.context['url_hash'])
+                if data is not None and image_data is not None:
+                    req.context['image_data'] = image_data
                     req.context['data'] = data
-                    req.context['reprocess visualization'] = True
+                    req.context['reprocess visualization'] = False
                     req.path = "/cache"
+                else:
+                    # Check if request with same data parameters but different viz parameters exist
+                    data = api.r.get('data-{}'.format(req.context['url_hash_without_viz']))
+                    if data is not None:
+                        req.context['data'] = data
+                        req.context['reprocess visualization'] = True
+                        req.path = "/cache"
 
         # Get API key if it exists
         self.api_key = req.get_header('api-key')
@@ -72,9 +75,6 @@ class MiddleWare:
             self.ip_address = req.env['HTTP_CF_CONNECTING_IP']
         else:
             self.ip_address = "unknown"
-
-        # req.context and resp.context (dicts) can be used to stash data
-        req.context["start_time"] = time.time()
 
         # Get type of request (comment,submission,etc.)
         path = req.path.lower()
@@ -169,11 +169,11 @@ class MiddleWare:
             json_args['ensure_ascii'] = False
 
             # Check if ensure_ascii was requested
-            if 'ensure_ascii' in req.params and req.params['ensure_ascii']:
+            if req.params.get('ensure_ascii',False):
                 json_args['ensure_ascii'] = True
 
             # Check if pretty print was requested
-            if 'pretty' in req.params and req.params['pretty']:
+            if req.params.get('pretty',False):
                 json_args['indent'] = 4
 
             # Check if data exists
@@ -190,6 +190,9 @@ class MiddleWare:
                 data['metadata']['original_params'] = self.original_parameters
                 data['metadata']['interpreted_params'] = req.params
                 data['metadata']['type'] = req.context['type']
+
+            req.context["end_time"] = time.time()
+            req.context["metadata"]["execution_time_ms"] = round((req.context["end_time"] - req.context["start_time"]) * 1000)
 
             json_data = json.dumps(data,**json_args)
             json_cache_data = json.dumps(data)  # No pretty
@@ -212,9 +215,12 @@ class MiddleWare:
     def process_image(self,req):
         if 'output' in req.params and req.params['output'] == 'png':
             if 'aggregation' in req.params and req.params['aggregation'][0].startswith("created_utc"):
-                image = dataviz.create_timeline(req,[])
+                image = dataviz.create_timeline(req)
             if 'aggregation' in req.params and ('subreddit' in req.params['aggregation'] or 'author' in req.params['aggregation']):
-                image = dataviz.create_chart(req,[])
+                image = dataviz.create_chart(req)
+            if image is None:
+                raise falcon.HTTPInternalServerError(title="Cannot create visualization",
+                                                        description="Something went wrong creating the data visualization. There may have been no data.")
             image_data = image.read()
             return image_data
 
@@ -308,10 +314,11 @@ class App(falcon.API):
     def __init__(self, *args, **kwargs):
         super(App, self).__init__(*args, **kwargs)
         self.r = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+        self.enable_caching = False
 
 api = App(middleware=[MiddleWare()])
+api.req_options.auto_parse_qs_csv = False
 api.req_options.keep_blank_qs_values = True
-api.auto_parse_qs_csv = False
 
 #api.add_route('/reddit/subreddit/search', Subreddit.search())
 #api.add_route('/reddit/search/subreddit', Subreddit.search())
