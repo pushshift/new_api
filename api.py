@@ -53,14 +53,14 @@ class MiddleWare:
             if data is not None and image_data is not None:
                 req.context['image_data'] = image_data
                 req.context['data'] = data
-                req.context['reprocess'] = False
+                req.context['reprocess visualization'] = False
                 req.path = "/cache"
             else:
                 # Check if request with same data parameters but different viz parameters exist
                 data = api.r.get('data-{}'.format(req.context['url_hash_without_viz']))
                 if data is not None:
                     req.context['data'] = data
-                    req.context['reprocess'] = True
+                    req.context['reprocess visualization'] = True
                     req.path = "/cache"
 
         # Get API key if it exists
@@ -102,7 +102,14 @@ class MiddleWare:
             #    req.params[key] = req.params[key].lower()  # Lowercase all parameter values
 
             if key not in self.valid_params:
-                raise falcon.HTTPInvalidParam(  'Please remember to keep all parameters lowercase.',key,
+                # Find possible matches
+                recommend = ""
+                for valid_key in self.valid_params:
+                    if key in valid_key:
+                        recommend = "Did you mean to use the parameter {}? ".format(valid_key)
+                        break
+
+                raise falcon.HTTPInvalidParam(  '{}Please remember to keep all parameters lowercase.'.format(recommend),key,
                                                 href='https://api.pushshift.io/valid_parameters',
                                                 href_text='Refer to this link for a list of valid parameters')
 
@@ -214,7 +221,7 @@ class fetch_cache:
         if 'data' not in req.context:
             resp.body = "I am the cache endpoint!"
         else:
-            if req.context['reprocess']:
+            if req.context['reprocess visualization']:
                 j = json.loads(req.context['data'])
                 original_params = j['metadata']['interpreted_params']
                 for key in original_params.keys():
@@ -302,6 +309,7 @@ class App(falcon.API):
 
 api = App(middleware=[MiddleWare()])
 api.req_options.keep_blank_qs_values = True
+api.auto_parse_qs_csv = False
 
 #api.add_route('/reddit/subreddit/search', Subreddit.search())
 #api.add_route('/reddit/search/subreddit', Subreddit.search())

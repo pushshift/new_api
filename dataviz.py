@@ -149,7 +149,7 @@ def create_chart(req,data):
         plt.suptitle('{} Activity'.format(title),x=0.55,fontsize=18)
 
     if 'chart.subtitle' in req.params:
-        plt.title("\n".join(wrap(','.join(req.params['chart.subtitle']), 70)),fontsize=8)
+        plt.title("\n".join(wrap(req.params['chart.subtitle'], 70)),fontsize=8)
     else:
         plt.title("\n".join(wrap(title_string, 80)),fontsize=8,color='#333333')
 
