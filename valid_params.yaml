@@ -561,6 +561,13 @@ chart.ymax:
     type: numeric
     category: visualization
 
+chart.xlabel:
+    description: |
+        Set the X-axis label.
+
+    type: string
+    category: visualization
+
 chart.ylabel:
     description: |
         Set the Y-axis label.
