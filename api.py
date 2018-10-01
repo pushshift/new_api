@@ -12,6 +12,7 @@ import parameters
 import elasticsearch
 import aggregations
 import hashlib
+import difflib
 from collections import defaultdict
 from collections import OrderedDict
 import urllib
@@ -98,16 +99,17 @@ class MiddleWare:
 
         # Sanity Check for request -- make sure there are no unknown parameters and that present parameters have correct types
         for key in req.params.keys():
-            #if isinstance(req.params[key],str):
-            #    req.params[key] = req.params[key].lower()  # Lowercase all parameter values
 
             if key not in self.valid_params:
-                # Find possible matches
+                # Recommend the best matching parameter if one is found
                 recommend = ""
+                scores = []
                 for valid_key in self.valid_params:
-                    if key in valid_key:
-                        recommend = "Did you mean to use the parameter {}? ".format(valid_key)
-                        break
+                    diff = difflib.SequenceMatcher(None, key, valid_key).ratio()
+                    scores.append((valid_key,diff))
+                top_match = sorted(scores, key=lambda x: x[1])[-1]
+                if top_match[1] > .50:
+                    recommend = 'Did you mean to use the parameter "{}"? '.format(top_match[0])
 
                 raise falcon.HTTPInvalidParam(  '{}Please remember to keep all parameters lowercase.'.format(recommend),key,
                                                 href='https://api.pushshift.io/valid_parameters',
