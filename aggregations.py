@@ -23,8 +23,15 @@ def Process(obj,req):
                 if nested_aggs[1] == "cardinality":
                     req.context['es_query']['aggs']['created_utc']['aggs'][nested_aggs[1]][nested_aggs[1]]['precision_threshold'] = 40000
 
-        if agg in ['author','subreddit']:
+        if agg in ['author','subreddit','domain']:
             req.context['es_query']['aggs'][agg]['terms']['field'] = agg
+            req.context['es_query']['aggs'][agg]['terms']['size'] = req.params['aggregation.size']
+            if 'aggregation.shard_size' in req.params:
+                req.context['es_query']['aggs'][agg]['terms']['shard_size'] = req.params['aggregation.shard_size']
+            req.context['es_query']['aggs'][agg]['terms']['order']['_count'] = 'desc'
+
+        if agg == 'domain':
+            req.context['es_query']['aggs'][agg]['terms']['field'] = 'domain.keyword'
             req.context['es_query']['aggs'][agg]['terms']['size'] = req.params['aggregation.size']
             if 'aggregation.shard_size' in req.params:
                 req.context['es_query']['aggs'][agg]['terms']['shard_size'] = req.params['aggregation.shard_size']

@@ -120,7 +120,7 @@ def create_timeline(req):
 
 def create_chart(req):
 
-    for key in ['author','subreddit']:
+    for key in ['author','subreddit','domain']:
         if key in req.context['aggs']:
             title = key.capitalize()
             data = req.context['aggs'][key]['buckets']
@@ -133,9 +133,9 @@ def create_chart(req):
     values = [x['doc_count'] for x in data[::-1]]
     y_pos = np.arange(len(data))
 
-    if 'colormap' in req.params and req.params['colormap'] is not None:
+    if 'chart.colormap' in req.params and req.params['chart.colormap'] is not None:
         try:
-            colors = getattr(cm,req.params['colormap'])(np.linspace(0.4,0.9,len(data)))
+            colors = getattr(cm,req.params['chart.colormap'])(np.linspace(0.4,0.9,len(data)))
         except:
             raise falcon.HTTPUnprocessableEntity(description="Unknown colormap value.  Please check here for valid colormap values (case-sensitive): https://matplotlib.org/examples/color/colormaps_reference.html")
     else:

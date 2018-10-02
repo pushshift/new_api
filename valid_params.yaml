@@ -42,6 +42,13 @@ author:
     type: string
     valid objects: comment,submission
 
+domain:
+    description: |
+        Filter submissions based on domain.
+
+    type: string
+    valid objects: submission
+
 title:
     description: |
         This parameter will search submissions based on the title field and can use the same type of operators as the "q" parameter
@@ -517,7 +524,7 @@ output:
     valid objects: comment,submission
     default: json
 
-colormap:
+chart.colormap:
     description: |
         Used to change the colors of a data visualization when output=png. Examples:
 

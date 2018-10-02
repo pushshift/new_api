@@ -45,8 +45,31 @@ def Process(obj,req):
                 parameter['term'][condition] = False
             es_query['query']['bool']['must'].append(parameter)
 
-    # Process before and after parameters
+    # Handle parameters that are range parameters (less than, greater than, equal to, etc.)
+    conditions = [  "controversiality","comment_score_hide_mins","id","created_utc","author_created_utc","edited_on","retrieved_on",
+                    "last_updated","subreddit_subscribers","subscribers","sub_reply_delay","reply_delay","score","num_comments",
+                    "num_crossposts","nest_level","edited","parent_id","length","utc_hour_of_week","id"]
+    for condition in conditions:
+        if condition in req.params and req.params[condition] is not None:
+            req.params[condition] = uri.decode(req.params[condition])
+            if not isinstance(req.params[condition], (list, tuple)):
+                req.params[condition] = [req.params[condition]]
+            range = nested_dict()
+            for p in req.params[condition]:
+                range = nested_dict()
+                if not str(p).isdigit():
+                    less = re.search(r'<(\d+)',p)
+                    if less is not None:
+                        range['range'][condition]['lt'] = less.group(1)
+                    greater = re.search(r'>(\d+)',p)
+                    if greater is not None:
+                        range['range'][condition]['gt'] = greater.group(1)
+                else:
+                    range['range'][condition]['lte'] = p
+                    range['range'][condition]['gte'] = p
+                es_query['query']['bool']['filter']['bool']['must'].append(range)
 
+    # Process before and after parameters
     date_pattern = re.compile("^\d\d\d\d-\d\d-\d\d")
     date_time_pattern = re.compile("^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d")
 

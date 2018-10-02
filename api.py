@@ -230,9 +230,10 @@ class MiddleWare:
 
     def process_image(self,req):
         if 'output' in req.params and req.params['output'] == 'png':
+            image= None
             if 'aggregation' in req.params and req.params['aggregation'][0].startswith("created_utc"):
                 image = dataviz.create_timeline(req)
-            if 'aggregation' in req.params and ('subreddit' in req.params['aggregation'] or 'author' in req.params['aggregation']):
+            if 'aggregation' in req.params and (req.params['aggregation'][0] in ['author','subreddit','domain']):
                 image = dataviz.create_chart(req)
             if image is None:
                 raise falcon.HTTPInternalServerError(title="Cannot create visualization",

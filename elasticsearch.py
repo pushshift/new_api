@@ -3,6 +3,7 @@
 import requests
 import ujson as json
 import falcon
+import helpers
 import re
 
 class Connector:
@@ -40,7 +41,6 @@ class Connector:
         if not status_code.startswith('2'):
             raise falcon.HTTPInternalServerError(title="Internal Error from Elasticsearch",
                                                 description="{}".format(response.content.decode('utf8')))
-
         else:
             es_data = json.loads(response.content)
 
@@ -49,7 +49,10 @@ class Connector:
                 hits = es_data['hits'].pop('hits')
                 req.context['data'] = []
                 for hit in hits:
-                    req.context['data'].append(hit['_source'])
+                    obj = hit['_source']
+                    obj['id'] = helpers.base36encode(int(hit['_id']))
+                    obj['base10_id'] = int(hit['_id'])
+                    req.context['data'].append(obj)
 
             # Process Aggregations
             if 'aggregations' in es_data:
@@ -71,4 +74,3 @@ class Connector:
             es['timed_out'] = es_data['timed_out']
             es['shards'] = es_data['_shards']
             es['hits'] = es_data['hits']
-
