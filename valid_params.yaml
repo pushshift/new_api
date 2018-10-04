@@ -251,6 +251,13 @@ author_created_utc:
     type: string
     valid objects: comment,submission
 
+author_created_utc_delta:
+    description:
+        The difference (in seconds) between when an object was created and when the author's account was created.
+
+    type: numeric
+    valid objects: comment,submission
+
 score:
     description: |
         The score (karma) for a comment or submission.  Submissions cannot have a score of less than 0.  Comments can have negative scores.
@@ -390,6 +397,14 @@ aggs:
         (deprecated) Alias for aggregation.  Please use aggregation instead of aggs.
 
     alias to: aggregation
+
+aggregation.compare:
+    description: |
+        For fields where multiple items can be used (e.g. author,subreddit), setting this value to true will create sub-aggregations
+        for these items insteam of treating them as a whole.
+
+    type: boolean
+    valid objects: comment,submission
 
 frequency:
     description: |
