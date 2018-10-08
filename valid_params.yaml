@@ -400,10 +400,10 @@ aggs:
 
 aggregation.compare:
     description: |
-        For fields where multiple items can be used (e.g. author,subreddit), setting this value to true will create sub-aggregations
-        for these items insteam of treating them as a whole.
+        For fields where multiple items can be used (e.g. author,subreddit), setting this key to the field you wish to compare will
+        create subaggregations for that field.
 
-    type: boolean
+    type: string
     valid objects: comment,submission
 
 frequency:
@@ -512,7 +512,7 @@ aggregation.size:
 
     type: numeric
     valid objects: comment,submission
-    max size: 500
+    max size: 10000
     min size: 1
     default: 25
 
@@ -538,6 +538,14 @@ output:
     type: string
     valid objects: comment,submission
     default: json
+
+chart.set_scientific:
+    description: |
+        Disable scientific notation by setting to false.
+
+    type: boolean
+    valid objects: comment,submission
+    category: visualization    
 
 chart.colormap:
     description: |
@@ -570,11 +578,48 @@ chart.subtitle:
     type: string
     category: visualization
 
-chart.log:
+chart.subtitle.fontsize:
     description: |
-        Set the chart Y scale to Log.
+        Set the font size of the chart subtitle.
+
+    type: numeric
+    category: visualization
+
+chart.sort:
+    description: |
+        Sort Y-axis of chart
 
     type: boolean
+    category: visualization
+
+chart.log:
+    description: |
+        Set the chart Y scale to log.
+
+    type: boolean
+    category: visualization
+
+chart.xaxis.log:
+    description: |
+        Set the chart X scale to log.
+
+    type: boolean
+    category: visualization
+
+chart.xaxis.scale:
+    description: |
+        Can be used to scale down large numbers on the x-axis.  For example, if numbers are in the millions, use
+        chart.xaxis.scale=1000000 to scale down by a million.
+
+    type: numeric
+    category: visualization
+
+chart.bucket.size:
+    description: |
+        Put values in buckets of X size such that:
+            value = math.floor(value/x)*x
+
+    type: numeric
     category: visualization
 
 chart.ymin:
@@ -587,6 +632,13 @@ chart.ymin:
 chart.ymax:
     description: |
         End the Y-axis at this max value for a chart.
+
+    type: numeric
+    category: visualization
+
+chart.xmin:
+    description: |
+        Begin the X-axis at this min value for a chart.
 
     type: numeric
     category: visualization
@@ -612,4 +664,12 @@ chart.trim:
 
     type: boolean
     category: visualization
+
+node:
+    description: |
+        Query a specific ES node.
+
+    type: string
+    authentication: admin
+
 
